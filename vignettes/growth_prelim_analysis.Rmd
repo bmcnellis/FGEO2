@@ -1,0 +1,41 @@
+---
+title: "growth_prelim_analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{growth_prelim_analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo = F}
+library(FGEO2)
+library(ggplot2)
+
+LAU <- read.csv('../../data/LAU_processed.csv')
+# remove stems with abs ddbh > 5
+LAU[which(abs(LAU$dDBH) > 5), 'dDBH'] <- NA
+```
+
+```{r chunk_3}
+ggplot(data = LAU, aes(x = sp, y = dDBH)) +
+  geom_boxplot() +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black'),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'delta DBH (cm / year)')
+```
+
+
+```{r chunk_4}
+
+```
