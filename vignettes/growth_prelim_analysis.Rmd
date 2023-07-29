@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 8, 
+  fig.height = 6
 )
 ```
 
@@ -23,19 +25,55 @@ LAU <- read.csv('../../data/LAU_processed.csv')
 LAU[which(abs(LAU$dDBH) > 5), 'dDBH'] <- NA
 ```
 
+```{r chunk_2pt5}
+ggplot(data = LAU, aes(x = sp, y = dbh)) +
+  geom_boxplot() +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'DBH (cm)') +
+  ggtitle('Tree diameter - initial census')
+```
+
 ```{r chunk_3}
 ggplot(data = LAU, aes(x = sp, y = dDBH)) +
   geom_boxplot() +
   
   theme_bw() +
   theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'delta DBH (cm / year)') +
+  ggtitle('Growth increment - uncorrected')
+```
+
+```{r chunk_4}
+ggplot(data = LAU, aes(x = sp, y = height)) +
+  geom_boxplot() +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'Height (m)') +
+  ggtitle('Tree Height (Est. Allo.)')
+```
+
+```{r chunk_5}
+ggplot(data = LAU[which(LAU$sp == 'CIBSPP'), ], aes(x = height)) +
+  geom_histogram(fill = 'grey50', color = 'black', bins = 30) +
+  
+  theme_bw() +
+  theme(
     axis.text.x = element_text(color = 'black'),
     axis.text.y = element_text(color = 'black')
   ) +
-  labs(x = '', y = 'delta DBH (cm / year)')
-```
-
-
-```{r chunk_4}
-
+  labs(x = 'Height (m)', y = 'Number of individuals') +
+  ggtitle('Modeled height - tree fern')
+  
 ```

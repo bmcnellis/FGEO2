@@ -87,6 +87,19 @@ for (i in seq_along(unique(LAU$CensusID))) {
 
 }
 
-# new stems that enter census / basal area
+# fix growth increment
+# using dtruncnorm strategy
+
+# add height
+LAU_dbh$height <- FGEO2::dbh_to_height(LAU_dbh$sp, LAU_dbh$dbh)
+LAU_dbh <- LAU_dbh[which(LAU_dbh$height < 40), ]
+# fix CIB* height using dtruncnorm strategy
+
+# get competition index
+# coerce x and y
+LAU_dbh$gx <- as.numeric(LAU_dbh$gx)
+LAU_dbh$gy <- as.numeric(LAU_dbh$gy)
+# needs adjusting
+comp <- FGEO2::calc_light_index(LAU_dbh$gx, LAU_dbh$gy, LAU_dbh$height, 5)
 
 write.csv(LAU_dbh, '../data/LAU_processed.csv', row.names = F)

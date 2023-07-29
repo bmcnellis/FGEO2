@@ -5,7 +5,7 @@
 \alias{dbh_to_height}
 \title{Allometry helper functions}
 \usage{
-dbh_to_height(sp, d)
+dbh_to_height(species, dbh)
 }
 \description{
 NA
