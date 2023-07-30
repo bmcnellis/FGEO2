@@ -88,12 +88,16 @@ for (i in seq_along(unique(LAU$CensusID))) {
 }
 
 # fix growth increment
+# remove growth increment of 10+
+LAU_dbh <- LAU_dbh[-which(LAU_dbh$dDBH > 10), ]
 # using dtruncnorm strategy
+LAU_dbh$dDBH_adj <- FGEO2::fix_DBH(LAU_dbh$dDBH, LAU_dbh$dbh, 'median')
 
 # add height
 LAU_dbh$height <- FGEO2::dbh_to_height(LAU_dbh$sp, LAU_dbh$dbh)
-LAU_dbh <- LAU_dbh[which(LAU_dbh$height < 40), ]
 # fix CIB* height using dtruncnorm strategy
+max_CIB_height <- 7
+LAU_dbh$height[which(LAU_dbh$sp == 'CIBSPP')] <- FGEO2::fix_height(LAU_dbh$height[which(LAU_dbh$sp == 'CIBSPP')], max_CIB_height)
 
 # get competition index
 # coerce x and y

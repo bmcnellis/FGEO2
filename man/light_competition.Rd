@@ -3,9 +3,12 @@
 \name{light_competition}
 \alias{light_competition}
 \alias{calc_light_index}
+\alias{fix_edge}
 \title{Light competition calculation function}
 \usage{
-calc_light_index(x, y, z, cz = 10)
+calc_light_index(x, y, z, cz = 5, maxx = 200, maxy = 200)
+
+fix_edge()
 }
 \description{
 NA

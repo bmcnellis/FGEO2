@@ -2,3 +2,7 @@
 
 export(calc_light_index)
 export(dbh_to_height)
+export(fix_DBH)
+export(fix_edge)
+export(fix_height)
+export(mode0)
