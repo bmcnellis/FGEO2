@@ -104,6 +104,6 @@ LAU_dbh$height[which(LAU_dbh$sp == 'CIBSPP')] <- FGEO2::fix_height(LAU_dbh$heigh
 LAU_dbh$gx <- as.numeric(LAU_dbh$gx)
 LAU_dbh$gy <- as.numeric(LAU_dbh$gy)
 # needs adjusting
-comp <- FGEO2::calc_light_index(LAU_dbh$gx, LAU_dbh$gy, LAU_dbh$height, 5)
+LAU_dbh$light_comp <- FGEO2::calc_light_index(LAU_dbh$gx, LAU_dbh$gy, LAU_dbh$height, 5)
 
 write.csv(LAU_dbh, '../data/LAU_processed.csv', row.names = F)

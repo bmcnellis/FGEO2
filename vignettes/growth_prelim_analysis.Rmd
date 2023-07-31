@@ -19,14 +19,19 @@ knitr::opts_chunk$set(
 ```{r setup, echo = F}
 library(FGEO2)
 library(ggplot2)
+library(terra)
+
+result_dir <- '../../results'
+
+LAU_DEM_fl <- '../inst/extdata/LAU_DEM_tif.tif'
 
 LAU <- read.csv('../../data/LAU_processed.csv')
 # remove stems with abs ddbh > 5
 LAU[which(abs(LAU$dDBH) > 5), 'dDBH'] <- NA
 ```
 
-```{r chunk_2pt5}
-ggplot(data = LAU, aes(x = sp, y = dbh)) +
+```{r chunk_2pt5. tree_diam}
+diam_plot <- ggplot(data = LAU, aes(x = sp, y = dbh)) +
   geom_boxplot() +
   
   theme_bw() +
@@ -36,9 +41,13 @@ ggplot(data = LAU, aes(x = sp, y = dbh)) +
   ) +
   labs(x = '', y = 'DBH (cm)') +
   ggtitle('Tree diameter - initial census')
+
+diam_plot
+
+FGEO2::HighResTiff(diam_plot, file.path(result_dir, 'diam_plot.tif'), 6, 4.5, 150)
 ```
 
-```{r chunk_3}
+```{r chunk_3, increment_uncorrected}
 ggplot(data = LAU, aes(x = sp, y = dDBH)) +
   geom_boxplot() +
   
@@ -51,8 +60,25 @@ ggplot(data = LAU, aes(x = sp, y = dDBH)) +
   ggtitle('Growth increment - uncorrected')
 ```
 
+```{r chunk_3pt5, increment_corrected}
+inc_adj_plot <- ggplot(data = LAU, aes(x = sp, y = dDBH_adj)) +
+  geom_boxplot() +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'delta DBH (cm / year)') +
+  ggtitle('Growth increment - corrected')
+
+inc_adj_plot
+
+FGEO2::HighResTiff(inc_adj_plot, file.path(result_dir, 'inc_adj_plot.tif'), 6, 4.5, 150)
+```
+
 ```{r chunk_4}
-ggplot(data = LAU, aes(x = sp, y = height)) +
+height_plot <- ggplot(data = LAU, aes(x = sp, y = height)) +
   geom_boxplot() +
   
   theme_bw() +
@@ -61,10 +87,14 @@ ggplot(data = LAU, aes(x = sp, y = height)) +
     axis.text.y = element_text(color = 'black')
   ) +
   labs(x = '', y = 'Height (m)') +
-  ggtitle('Tree Height (Est. Allo.)')
+  ggtitle('Tree Height (Allometric)')
+
+height_plot
+
+FGEO2::HighResTiff(height_plot, file.path(result_dir, 'height_plot.tif'), 6, 4.5, 150)
 ```
 
-```{r chunk_5}
+```{r chunk_5, include = F}
 ggplot(data = LAU[which(LAU$sp == 'CIBSPP'), ], aes(x = height)) +
   geom_histogram(fill = 'grey50', color = 'black', bins = 30) +
   
@@ -76,4 +106,76 @@ ggplot(data = LAU[which(LAU$sp == 'CIBSPP'), ], aes(x = height)) +
   labs(x = 'Height (m)', y = 'Number of individuals') +
   ggtitle('Modeled height - tree fern')
   
+```
+
+```{r chunk_6, include = T}
+lcomp_plot <- ggplot(data = LAU, aes(x = sp, y = light_comp)) +
+  geom_boxplot() +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  labs(x = '', y = 'Light competition index')
+
+lcomp_plot
+
+FGEO2::HighResTiff(lcomp_plot, file.path(result_dir, 'lcomp_plot.tif'), 6, 4.5, 150)
+```
+
+```{r chunk_7, include = T}
+# make stem map for METPOL
+set.seed(1)
+
+LAU_DEM <- terra::rast(LAU_DEM_fl)
+
+LAU_METPOL <- LAU[which(LAU$sp == 'METPOL'), ]
+LAU_METPOL <- LAU_METPOL[which(LAU_METPOL$DFstatus == 'alive'), ]
+LAU_METPOL <- LAU_METPOL[which(LAU_METPOL$CensusID == 5), ]
+
+LAU_KOA <- LAU[which(LAU$sp == 'ACAKOA'), ]
+LAU_KOA <- LAU_KOA[which(LAU_KOA$DFstatus == 'alive'), ]
+LAU_KOA <- LAU_KOA[which(LAU_KOA$CensusID == 5), ]
+
+dead_trees <- sample(seq(nrow(LAU_METPOL)), floor(nrow(LAU_METPOL) * 0.75))
+aliv_trees <- seq(nrow(LAU_METPOL))[-which(seq(nrow(LAU_METPOL)) %in% dead_trees)]
+
+LAU_mort_1 <- LAU_METPOL[aliv_trees, ]
+LAU_mort_2 <- LAU_METPOL[dead_trees, ]
+
+tiff(file.path(result_dir, 'METPOL_map_1.tif'), width = 6.5, height = 7, units = 'in', res = 150)
+plot(LAU_DEM, main = 'METPOL stems, alive census 5')
+points(LAU_METPOL$x, LAU_METPOL$y, pch = 16)
+dev.off()
+
+tiff(file.path(result_dir, 'METPOL_map_2.tif'), width = 6.5, height = 7, units = 'in', res = 150)
+plot(LAU_DEM, main = 'METPOL 75% mortality')
+points(LAU_mort_1$x, LAU_mort_1$y, pch = 16)
+points(LAU_mort_2$x, LAU_mort_2$y, pch = 4, col = 'orangered')
+dev.off()
+
+tiff(file.path(result_dir, 'KOA_map.tif'), width = 6.5, height = 7, units = 'in', res = 150)
+plot(LAU_DEM, main = 'KOA stems, alive census 5')
+points(LAU_KOA$x, LAU_KOA$y, pch = 16)
+dev.off()
+```
+
+```{r chunk_8}
+mort_fig <- ggplot(data = LAU, aes(x = sp, fill = DFstatus)) +
+  geom_bar(position = 'stack', stat = 'count') +
+  scale_fill_manual(values = c('grey20', 'red'), labels = c('Alive', 'Dead')) +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(color = 'black', angle = 45, hjust = 1),
+    axis.text.y = element_text(color = 'black')
+  ) +
+  
+  labs(x = 'Species', y = 'n', fill = 'Status')
+
+mort_fig
+
+FGEO2::HighResTiff(mort_fig, file.path(result_dir, 'mort_plot.tif'), 6, 4.5, 150)
+
 ```

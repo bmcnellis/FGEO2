@@ -26,7 +26,7 @@ calc_light_index <- function(x, y, z, cz = 5, maxx = 200, maxy = 200) {
     sq_ind <- xin[which(xin %in% yin)]
     sq_ind <- c(which(sq_ind == i), which(sq_ind != i))
     # fix edge effects
-    #FGEO2::fix_edge()
+    if (F) FGEO2::fix_edge()
     #find euclidian distance
     sq_mat <- matrix(data = c(x[sq_ind], y[sq_ind]), ncol = 2)
     sq_vec <- as.matrix(dist(sq_mat))[, 1]
